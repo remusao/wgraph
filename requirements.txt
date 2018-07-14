@@ -1,3 +1,4 @@
 docopt==0.6.2
+graphviz==0.8.4
 iso-639==0.4.5
 tqdm==4.23.4

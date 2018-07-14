@@ -154,17 +154,31 @@ def search(
     return []
 
 
-def verbose(ref: Ref) -> str:
+EXTRA_LANGUAGES = {
+    "gem-pro": "Proto-Germanic",
+    "ine-pro": "Proto-Indo-European",
+    "cel-pro": "Proto-Celtic",
+    "gmq-osw": "Old Swedish",
+}
+
+
+def verbose_language(origin: Optional[str]) -> str:
     language = "unknown origin"
-    if ref.origin is not None:
+    if origin is not None:
+        language = EXTRA_LANGUAGES.get(origin, origin)
         try:
-            if len(ref.origin) == 2:
-                language = languages.get(alpha2=ref.origin).name
-            elif len(ref.origin) == 3:
-                language = languages.get(part3=ref.origin).name
+            if len(origin) == 2:
+                language = languages.get(alpha2=origin).name
+            elif len(origin) == 3:
+                language = languages.get(part3=origin).name
             else:
-                print("???", ref)
+                print("???", origin)
         except KeyError:
-            language = ref.origin
+            language = origin
+    return language
+
+
+def verbose(ref: Ref) -> str:
+    language = verbose_language(ref.origin)
 
     return f"{REF_KIND.get(ref.kind)} {ref.word} ({language})"

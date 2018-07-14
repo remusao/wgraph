@@ -20,7 +20,7 @@ setup(
     author="Rémi",
     license="MIT",
     packages=find_packages(),
-    install_requires=["docopt", "tqdm", "iso-639"],
+    install_requires=["docopt", "tqdm", "iso-639", "graphviz"],
     extras_require={"dev": ["black", "mypy", "profiling", "pylint", "pre-commit"]},
     entry_points={
         "console_scripts": [
@@ -28,6 +28,7 @@ setup(
             "closest = wgraph.closest:main",
             "distance = wgraph.distance:main",
             "easiest = wgraph.easiest:main",
+            "summary = wgraph.summary:main",
         ]
     },
 )

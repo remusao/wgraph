@@ -1,109 +1,119 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from typing import Iterator
-import bz2
-import gzip
-import shelve
-import sys
-import time
+"""Summarize etymology of a word using a graph.
 
-from wgraph.loading import load_graph, split_references
+Usage:
+    summary [--group-by-origin] <graph> <word>
+    summary -h | --help
+"""
 
-REF_KIND = {
-    "B.C.E.": "Before the Common Era (https://en.wiktionary.org/wiki/Appendix:Glossary#BCE)",
-    "ISBN": "ISBN???",
-    "PIE root": "Proto-Indo-European root",
-    "abbreviation of": "Abbreviation of",
-    "af": "Equivalent to",
-    "affix": "Affix",
-    "blend": "Blend (https://en.wiktionary.org/wiki/Appendix:Glossary#blend)",
-    "bor": "Borrowed from",
-    "calque": "Calque (https://en.wiktionary.org/wiki/Appendix:Glossary#calque)",
-    "cite-book": "Citation Book",
-    "cite-web": "Citation Web",
-    "cog": "Cognates With",
-    "com": "Composed of???",
-    "compound": "Compound",
-    "confix": "Confix",
-    "contraction of": "Contraction of",
-    "der": "Derived from",
-    "derr": "Derived from?",  # TODO?
-    "doublet": "Doublet (https://en.wiktionary.org/wiki/Appendix:Glossary#doublet)",
-    "etyl": None,
-    "etymtwin": "Double of",
-    "etystub": "Incomplete",
-    "hu-suffix": "",
-    "inh": "Inherited from?",
-    "l": "l ???",
-    "lang": "lang ???",
-    "lbor": "Semi-learned borrowing from",
-    "m": "m ???",  # TODO - more?
-    "noncog": "Semantic loan from",
-    "prefix": "Prefix",
-    "qualifier": "Qualifier",  # Refer to previous
-    "rel-top": "rel-top???",
-    "rfe": "rfe???",
-    "suf": "Suffix???",
-    "suffix": "Suffix",
-    "unk": "Unknown",
-    "w": "with a work by",
-    "wikisource1911Enc": "wikisource1911Enc???",
-    "sense": "In the sense of",
-    "gloss": "gloss???",
-}
+from collections import defaultdict
+import itertools
 
-REF_ORIGIN = {
-    "af": "Afrikaans",
-    "enm": "Middle-English",
-    "xno": "Englo-Norman",
-    "la": "Latin",
-    "grc-koi": "Koine Greek",
-    "gml": "Middle Low German",
-    "gem-pro": "Proto-Germanic",
-    "osx": "Old Saxon",
-    "gl": "medieval?",
-    "LL.": "Late Latin",
-    "cel-pro": "Proto-Celtic",
-    "cel-gau": "Gaulish",
-    "qfa-sub-ibe": "A pre-Roman substrate of Iberia",
-    "ine-pro": "Proto-Indo-European",
-    "fro": "Old French",
-}
+import docopt
+import graphviz as gv
+
+from wgraph.graph import load, Word, dfs, verbose_language
+
+
+def apply_styles(name, graph):
+    """Custom style for graph."""
+    styles = {
+        "graph": {
+            "label": name,
+            "fontsize": "16",
+            "fontcolor": "white",
+            "bgcolor": "#333333",
+            "rankdir": "TB",
+        },
+        "nodes": {
+            "fontname": "Helvetica",
+            "fontcolor": "white",
+            "color": "white",
+            "style": "filled",
+            "fillcolor": "#006699",
+        },
+        "edges": {
+            "style": "dashed",
+            "color": "white",
+            "arrowhead": "open",
+            "fontname": "Courier",
+            "fontsize": "12",
+            "fontcolor": "white",
+        },
+    }
+
+    graph.graph_attr.update(("graph" in styles and styles["graph"]) or {})
+    graph.node_attr.update(("nodes" in styles and styles["nodes"]) or {})
+    graph.edge_attr.update(("edges" in styles and styles["edges"]) or {})
+    return graph
+
+
+def is_invalid(string):
+    if not string:
+        return True
+    if len(string) > 20:
+        return True
+    if ":" in string:
+        return True
+    if len(string) < 3:
+        return True
+    if "{" in string or "}" in string:
+        return True
+    return False
+
+
+def add_node(graph, parent, ref, word):
+    if ref.origin == "fr" or ref.origin == "en":
+        graph.attr("node", shape="box")
+        graph.attr("node", style="filled")
+        graph.attr("node", fillcolor="#006699")
+    else:
+        graph.attr("node", shape="ellipse")
+        graph.attr("node", style="filled")
+        graph.attr("node", fillcolor="#667474")
+
+    # Create new node
+    graph.node(ref.word)
+    graph.edge(parent.word if parent is not None else word, ref.word, label=ref.kind)
 
 
 def main():
-    path = sys.argv[1]
-    word = sys.argv[2]
-    graph = load_graph(path)
-    max_level = 2
+    args = docopt.docopt(__doc__)
+    path = args["<graph>"]
+    word = Word(args["<word>"])
 
-    seen = set([word1])
-    queue = split_references(graph.get(word1, ""))
-    queue.append(None)
-    print(word1, len(graph.get(word1, "")))
-    level = 1
-    while queue:
-        w = queue.pop(0)
+    graph = load(path)
 
-        # print("Level", level, w, queue)
-        if w is None:
-            level += 1
-        elif w == word2:
-            print("Found", level)
-            break
-        else:
-            if w in seen:
+    g = gv.Digraph(format="svg")
+    g.attr("node", shape="doublecircle")
+    g.node(word)
+
+    etymology = itertools.islice(dfs(graph=graph, max_depth=2, word=word), 50)
+    if args["--group-by-origin"]:
+        by_origin = defaultdict(list)
+        for parent, _, ref in etymology:
+            if is_invalid(ref.word) or (parent is not None and is_invalid(parent.word)):
                 continue
-            seen.add(w)
-            print(">>> w", level, w)  # , split_references(graph.get(w, "")))
-            queue.extend(split_references(graph.get(w, "")))
+            by_origin[ref.origin].append((parent, ref))
+
+        # Draw graph
+        for origin, references in by_origin.items():
+            with g.subgraph(name=f'cluster_{origin or "unknown_origin"}') as subgraph:
+                subgraph.attr(label=verbose_language(origin))
+                for parent, ref in references:
+                    add_node(subgraph, parent, ref, word)
     else:
-        print("Not found")
-    t2 = time.time()
-    print("Search time", t2 - t1)
-    print("Total time", t2 - t0)
+        for parent, _, ref in etymology:
+            if is_invalid(ref.word) or (parent is not None and is_invalid(parent.word)):
+                continue
+            add_node(g, parent, ref, word)
 
+    # Style 2
+    # g.node("word3")
+    # g.edge("start_word", "word3", label="cognates")
 
-if __name__ == "__main__":
-    main()
+    filename = f"wgraph_{word}"
+    apply_styles(word, g).render(filename)
+    print("Graph written into:", filename)
