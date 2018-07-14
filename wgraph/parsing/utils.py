@@ -9,10 +9,10 @@ from wgraph.parsing.types import Ref, Title, Section, Line
 
 
 def extract_named_argument(string: str, kw: str) -> Optional[str]:
-    kw = f"{kw}="
-    start_of_word = string.find(kw)
+    token = f"{kw}="
+    start_of_word = string.find(token)
     if start_of_word != -1:
-        start_of_word += len(kw)
+        start_of_word += len(token)
         end_of_word = string.find("|", start_of_word)
         if end_of_word == -1:
             return string[start_of_word:]

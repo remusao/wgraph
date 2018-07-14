@@ -12,30 +12,30 @@ from wgraph.parsing.utils import iter_templates, iter_links, extract_named_argum
 def parse_etyl(template: str) -> Iterator[Ref]:
     mot = extract_named_argument(template, "mot")
     if mot is not None:
-        yield Ref(word=mot, origin="?", kind="etyl")
+        yield Ref(word=mot, origin=None, kind="etyl")
 
     dif = extract_named_argument(template, "dif")
     if dif is not None:
-        yield Ref(word=dif, origin="?", kind="etyl")
+        yield Ref(word=dif, origin=None, kind="etyl")
 
     if mot is None:
         separators = template.count("|")
         if separators >= 3:
             parts = template.split("|")
-            yield Ref(word=parts[3], origin="?", kind="etyl")
+            yield Ref(word=parts[3], origin=None, kind="etyl")
 
 
 def parse_lien(template: str) -> Iterator[Ref]:
     if template.count("|") == 2:
         parts = template.split("|")
-        yield Ref(word=parts[1], origin="?", kind="lien")
+        yield Ref(word=parts[1], origin=None, kind="lien")
     # else:
     #     print("LIEN", template)
 
 
 def parse_recons(template: str) -> Iterator[Ref]:
     if template.count("|") == 1:
-        yield Ref(word=template.split("|")[-1], origin="?", kind="recons")
+        yield Ref(word=template.split("|")[-1], origin=None, kind="recons")
     # else:
     #     print("RECONS", template)
 
@@ -57,9 +57,9 @@ def parse_template(template: str) -> Iterator[Ref]:
 
 def parse_link(link: str) -> Iterator[Ref]:
     if "|" in link:
-        yield Ref(word=link.rsplit("|", 1)[-1], origin="?", kind="link")
+        yield Ref(word=link.rsplit("|", 1)[-1], origin=None, kind="link")
     else:
-        yield Ref(word=link, origin="?", kind="link")
+        yield Ref(word=link, origin=None, kind="link")
 
 
 def iter_references(
