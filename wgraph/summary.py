@@ -4,8 +4,12 @@
 """Summarize etymology of a word using a graph.
 
 Usage:
-    summary [--group-by-origin] <graph> <word>
+    summary [options] <graph> <word>
     summary -h | --help
+
+Options:
+    --group-by-origin   Group nodes of the graph by origin
+    --max-depth=<n>     Maximum depth of the graph to explore [default: 1].
 """
 
 from collections import defaultdict
@@ -14,40 +18,15 @@ import itertools
 import docopt
 import graphviz as gv
 
-from wgraph.graph import load, Word, dfs, verbose_language
-
-
-def apply_styles(name, graph):
-    """Custom style for graph."""
-    styles = {
-        "graph": {
-            "label": name,
-            "fontsize": "16",
-            "fontcolor": "white",
-            "bgcolor": "#333333",
-            "rankdir": "TB",
-        },
-        "nodes": {
-            "fontname": "Helvetica",
-            "fontcolor": "white",
-            "color": "white",
-            "style": "filled",
-            "fillcolor": "#006699",
-        },
-        "edges": {
-            "style": "dashed",
-            "color": "white",
-            "arrowhead": "open",
-            "fontname": "Courier",
-            "fontsize": "12",
-            "fontcolor": "white",
-        },
-    }
-
-    graph.graph_attr.update(("graph" in styles and styles["graph"]) or {})
-    graph.node_attr.update(("nodes" in styles and styles["nodes"]) or {})
-    graph.edge_attr.update(("edges" in styles and styles["edges"]) or {})
-    return graph
+from wgraph.graph import (
+    Word,
+    apply_styles,
+    create_graph,
+    dfs,
+    draw_graph,
+    load,
+    verbose_language,
+)
 
 
 def is_invalid(string):
@@ -64,33 +43,16 @@ def is_invalid(string):
     return False
 
 
-def add_node(graph, parent, ref, word):
-    if ref.origin == "fr" or ref.origin == "en":
-        graph.attr("node", shape="box")
-        graph.attr("node", style="filled")
-        graph.attr("node", fillcolor="#006699")
-    else:
-        graph.attr("node", shape="ellipse")
-        graph.attr("node", style="filled")
-        graph.attr("node", fillcolor="#667474")
-
-    # Create new node
-    graph.node(ref.word)
-    graph.edge(parent.word if parent is not None else word, ref.word, label=ref.kind)
-
-
 def main():
     args = docopt.docopt(__doc__)
     path = args["<graph>"]
     word = Word(args["<word>"])
+    max_depth = int(args["--max-depth"])
 
     graph = load(path)
 
-    g = gv.Digraph(format="svg")
-    g.attr("node", shape="doublecircle")
-    g.node(word)
-
-    etymology = itertools.islice(dfs(graph=graph, max_depth=2, word=word), 50)
+    g = create_graph(root=word)
+    etymology = itertools.islice(dfs(graph=graph, max_depth=max_depth, word=word), 50)
     if args["--group-by-origin"]:
         by_origin = defaultdict(list)
         for parent, _, ref in etymology:
@@ -98,17 +60,21 @@ def main():
                 continue
             by_origin[ref.origin].append((parent, ref))
 
-        # Draw graph
         for origin, references in by_origin.items():
             with g.subgraph(name=f'cluster_{origin or "unknown_origin"}') as subgraph:
                 subgraph.attr(label=verbose_language(origin))
-                for parent, ref in references:
-                    add_node(subgraph, parent, ref, word)
+                draw_graph(graph=subgraph, root=word, elements=references)
     else:
-        for parent, _, ref in etymology:
-            if is_invalid(ref.word) or (parent is not None and is_invalid(parent.word)):
-                continue
-            add_node(g, parent, ref, word)
+        g = draw_graph(
+            root=word,
+            graph=g,
+            elements=(
+                (parent, ref)
+                for parent, _, ref in etymology
+                if not is_invalid(ref.word)
+                and (parent is None or not is_invalid(parent.word))
+            ),
+        )
 
     # Style 2
     # g.node("word3")

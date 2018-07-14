@@ -17,6 +17,7 @@ import gzip
 import time
 
 from iso639 import languages
+import graphviz as gv
 
 from wgraph.parsing.types import Ref
 
@@ -182,3 +183,73 @@ def verbose(ref: Ref) -> str:
     language = verbose_language(ref.origin)
 
     return f"{REF_KIND.get(ref.kind)} {ref.word} ({language})"
+
+
+def apply_styles(name, graph):
+    """Custom style for graph."""
+    styles = {
+        "graph": {
+            "label": name,
+            "fontsize": "16",
+            "fontcolor": "white",
+            "bgcolor": "#333333",
+            "rankdir": "TB",
+        },
+        "nodes": {
+            "fontname": "Helvetica",
+            "fontcolor": "white",
+            "color": "white",
+            "style": "filled",
+            "fillcolor": "#006699",
+        },
+        "edges": {
+            "style": "dashed",
+            "color": "white",
+            "arrowhead": "open",
+            "fontname": "Courier",
+            "fontsize": "12",
+            "fontcolor": "white",
+        },
+    }
+
+    graph.graph_attr.update(("graph" in styles and styles["graph"]) or {})
+    graph.node_attr.update(("nodes" in styles and styles["nodes"]) or {})
+    graph.edge_attr.update(("edges" in styles and styles["edges"]) or {})
+    return graph
+
+
+def add_node(graph, parent, ref, default_parent):
+    if ref.origin == "fr" or ref.origin == "en":
+        graph.attr("node", shape="box")
+        graph.attr("node", style="filled")
+        graph.attr("node", fillcolor="#006699")
+    else:
+        graph.attr("node", shape="ellipse")
+        graph.attr("node", style="filled")
+        graph.attr("node", fillcolor="#667474")
+
+    # Create new node
+    graph.node(ref.word)
+    graph.edge(
+        parent.word if parent is not None else default_parent, ref.word, label=ref.kind
+    )
+
+
+def create_graph(root):
+    graph = gv.Digraph(format="svg")
+    graph.attr("node", shape="doublecircle")
+    graph.node(root)
+    return graph
+
+
+def draw_graph(root, elements, target=None, graph=None):
+    if graph is None:
+        graph = create_graph(root)
+
+    for parent, ref in elements:
+        add_node(graph, parent, ref, root)
+
+    if target is not None:
+        add_node(graph, elements[-1][-1], target, root)
+
+    return graph

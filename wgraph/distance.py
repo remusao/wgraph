@@ -4,7 +4,17 @@
 import sys
 import time
 
-from wgraph.graph import load, search, Word, verbose, Graph
+from wgraph.graph import (
+    load,
+    search,
+    Word,
+    verbose,
+    Graph,
+    draw_graph,
+    add_node,
+    create_graph,
+    apply_styles,
+)
 
 
 def distance(graph: Graph, word1: Word, word2: Word) -> int:
@@ -39,10 +49,19 @@ def main() -> None:
     print("Search time", t2 - t1)
     print("Total time", t2 - t0)
 
+    g = create_graph(word1)
     if graph_path:
+        print("Distance:", len(graph_path))
         print("Start:", word1)
+        parent = None
         for ref in graph_path:
             print(">", verbose(ref))
+            add_node(g, parent, ref, word1)
+            parent = ref
+
+    filename = f"wgraph_distance_{word1}_{word2}"
+    apply_styles(word1, g).render(filename)
+    print("Graph written into:", filename)
 
 
 if __name__ == "__main__":

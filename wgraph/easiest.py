@@ -3,6 +3,7 @@
 
 from typing import DefaultDict, List
 import sys
+import random
 
 import tqdm
 
@@ -23,7 +24,11 @@ def main() -> None:
     supported_words = [
         word
         for word in de_words
-        if word in graph and word not in en_words and word not in fr_words
+        if word in graph
+        and word not in en_words
+        and word not in fr_words
+        and word.lower() not in en_words
+        and word.lower() not in fr_words
     ]
 
     # Sort them by distance
@@ -39,7 +44,9 @@ def main() -> None:
         print("=" * 40)
         print(">", dist)
         print("=" * 40)
-        for word in sorted(sorted_words[dist]):
+        words = sorted_words[dist]
+        random.shuffle(words)
+        for word in words:
             print("  *", word)
 
 
