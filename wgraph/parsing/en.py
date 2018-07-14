@@ -4,8 +4,9 @@
 """Reference extractor for English Wiktionary."""
 
 from typing import List, Iterator, Iterable, Tuple
-from .types import Ref, Title, Section, Line
-from .utils import iter_templates
+
+from wgraph.parsing.types import Ref, Title, Section, Line
+from wgraph.parsing.utils import iter_templates
 
 
 def parse_inherited(parts: List[str]) -> Iterator[Ref]:

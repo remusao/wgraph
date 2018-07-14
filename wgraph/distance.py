@@ -124,7 +124,7 @@ def main():
             if w in seen:
                 continue
             seen.add(w)
-            print(">>> w", level, w, split_references(graph.get(w, "")))
+            print(">>> w", level, w)  # , split_references(graph.get(w, "")))
             queue.extend(split_references(graph.get(w, "")))
     else:
         print("Not found")

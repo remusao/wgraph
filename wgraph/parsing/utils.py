@@ -4,7 +4,8 @@
 """Some parsing utilities"""
 
 from typing import Iterator, Iterable, Tuple, Optional
-from .types import Ref, Title, Section, Line
+
+from wgraph.parsing.types import Ref, Title, Section, Line
 
 
 def extract_named_argument(string: str, kw: str) -> Optional[str]:

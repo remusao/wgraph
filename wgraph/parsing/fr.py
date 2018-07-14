@@ -5,8 +5,8 @@
 
 from typing import Iterator, Iterable, Tuple
 
-from .types import Ref, Title, Section, Line
-from .utils import iter_templates, iter_links, extract_named_argument
+from wgraph.parsing.types import Ref, Title, Section, Line
+from wgraph.parsing.utils import iter_templates, iter_links, extract_named_argument
 
 
 def parse_etyl(template: str) -> Iterator[Ref]:
@@ -67,15 +67,13 @@ def iter_references(
 ) -> Iterator[Tuple[Title, Ref]]:
     for title, section, line in lines:
         if "étymologie" in section:
-            if title == "table":
-                print(title, section, line)
-                # First iterate templates
-                for template in iter_templates(line):
-                    for reference in parse_template(template):
-                        yield title, reference
+            # First iterate templates
+            for template in iter_templates(line):
+                for reference in parse_template(template):
+                    yield title, reference
 
-                # Most references are actually not using templates
-                # TODO - we could extract the 'origin' from the context
-                for link in iter_links(line):
-                    for reference in parse_link(link):
-                        yield title, reference
+            # Most references are actually not using templates
+            # TODO - we could extract the 'origin' from the context
+            for link in iter_links(line):
+                for reference in parse_link(link):
+                    yield title, reference

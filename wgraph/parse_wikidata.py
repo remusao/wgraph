@@ -30,10 +30,11 @@ import sys
 import docopt
 import tqdm
 
-from parsing.en import iter_references as iter_references_en
-from parsing.fr import iter_references as iter_references_fr
-from parsing.de import iter_references as iter_references_de
-from parsing.types import Ref, Title, Section, Line
+from wgraph.parsing.en import iter_references as iter_references_en
+from wgraph.parsing.fr import iter_references as iter_references_fr
+
+# from wgraph.parsing.de import iter_references as iter_references_de
+from wgraph.parsing.types import Ref, Title, Section, Line
 
 
 # TODO - add French/German wiktionary (Check if it works)
@@ -84,7 +85,7 @@ def main() -> None:
     parsers = {
         "fr": iter_references_fr,
         "en": iter_references_en,
-        "de": iter_references_de,
+        # "de": iter_references_de,
     }
     for path in args["<paths>"]:
         basename = os.path.basename(path)

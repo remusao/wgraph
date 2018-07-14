@@ -1,0 +1,140 @@
+[MASTER]
+
+# When enabled, pylint would attempt to guess common misconfiguration and emit
+# user-friendly hints instead of false-positive error messages
+suggestion-mode=yes
+
+# Allow loading of arbitrary C extensions. Extensions are imported into the
+# active Python interpreter and may run arbitrary code.
+unsafe-load-any-extension=no
+
+[MESSAGES CONTROL]
+
+# Disable the message, report, category or checker with the given id(s).
+disable=global-statement,R,C
+
+[REPORTS]
+
+# Set the output format. Available formats are text, parseable, colorized, json
+# and msvs (visual studio).You can also give a reporter class, eg
+# mypackage.mymodule.MyReporterClass.
+output-format=text
+
+# Tells whether to display a full report or only the messages
+reports=no
+
+# Activate the evaluation score.
+score=yes
+
+[MISCELLANEOUS]
+
+# List of note tags to take in consideration, separated by a comma.
+notes=FIXME,
+      XXX,
+      TODO
+
+
+[FORMAT]
+
+# Expected format of line ending, e.g. empty (any line ending), LF or CRLF.
+expected-line-ending-format=LF
+
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+
+# Number of spaces of indent required inside a hanging or continued line.
+indent-after-paren=4
+
+# 4 spaces
+indent-string='    '
+
+# Maximum number of characters on a single line.
+max-line-length=100
+
+# Maximum number of lines in a module
+max-module-lines=1000
+
+# Allow the body of an if to be on the same line as the test if there is no
+# else.
+single-line-if-stmt=no
+
+[BASIC]
+
+# Naming style matching correct argument names
+argument-naming-style=snake_case
+
+# Naming style matching correct attribute names
+attr-naming-style=snake_case
+
+# Naming style matching correct class attribute names
+class-attribute-naming-style=snake_case
+
+# Naming style matching correct class names
+class-naming-style=PascalCase
+
+# Naming style matching correct constant names
+const-naming-style=UPPER_CASE
+
+# Naming style matching correct function names
+function-naming-style=snake_case
+
+# Good variable names which should always be accepted, separated by a comma
+good-names=i,
+           j,
+           k,
+           _
+
+# Include a hint for the correct naming format with invalid-name
+include-naming-hint=yes
+
+# Naming style matching correct inline iteration names
+inlinevar-naming-style=any
+
+# Naming style matching correct method names
+method-naming-style=snake_case
+
+# Naming style matching correct module names
+module-naming-style=snake_case
+
+# Naming style matching correct variable names
+variable-naming-style=snake_case
+
+
+[DESIGN]
+
+# Maximum number of arguments for function / method
+max-args=5
+
+# Maximum number of attributes for a class (see R0902).
+max-attributes=7
+
+# Maximum number of boolean expressions in a if statement
+max-bool-expr=5
+
+# Maximum number of branch for function / method body
+max-branches=12
+
+# Maximum number of locals for function / method body
+max-locals=15
+
+# Maximum number of parents for a class (see R0901).
+max-parents=7
+
+# Maximum number of public methods for a class (see R0904).
+max-public-methods=20
+
+# Maximum number of return / yield for function / method body
+max-returns=6
+
+# Maximum number of statements in function / method body
+max-statements=50
+
+# Minimum number of public methods for a class (see R0903).
+min-public-methods=2
+
+
+[EXCEPTIONS]
+
+# Exceptions that will emit a warning when being caught. Defaults to
+# "Exception"
+overgeneral-exceptions=Exception
