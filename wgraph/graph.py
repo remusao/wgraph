@@ -19,7 +19,7 @@ import time
 from iso639 import languages
 import graphviz as gv
 
-from wgraph.parsing.types import Ref
+from wgraph.parsing.structs import Ref
 
 Word = NewType("Word", str)
 SerializedRefs = NewType("SerializedRefs", str)
@@ -56,13 +56,15 @@ def iter_lines(path: str) -> Iterator[str]:
 
 
 def serialize_ref(ref: Ref) -> str:
-    return f"{ref.word}|{ref.kind}|{ref.origin or ''}"
+    return f"{ref.word}|{ref.kind}|{ref.origin or ''}|{ref.destination or ''}"
 
 
 def deserialize_ref(ref: str) -> Optional[Ref]:
     try:
-        word, kind, origin = ref.strip().split("|")
-        return Ref(word=word, kind=kind, origin=origin or None)
+        word, kind, origin, destination = ref.strip().split("|")
+        return Ref(
+            word=word, kind=kind, origin=origin or None, destination=destination or None
+        )
     except ValueError:
         return None
 
@@ -126,7 +128,12 @@ def dfs(
                 continue
             seen.add(word)
 
+            print((parents.get(ref), level, ref))
             yield (parents.get(ref), level, ref)
+
+            if ref.kind == 'link':
+                continue
+
             if word in graph:
                 for r in split_references(graph[word]):
                     parents[r] = ref
@@ -206,7 +213,7 @@ def apply_styles(name, graph):
             "style": "dashed",
             "color": "white",
             "arrowhead": "open",
-            "fontname": "Courier",
+            # "fontname": "Courier",
             "fontsize": "12",
             "fontcolor": "white",
         },
@@ -230,6 +237,7 @@ def add_node(graph, parent, ref, default_parent):
 
     # Create new node
     graph.node(ref.word)
+    print(ref.kind)
     graph.edge(
         parent.word if parent is not None else default_parent, ref.word, label=ref.kind
     )

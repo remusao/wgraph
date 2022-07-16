@@ -5,7 +5,7 @@
 
 from typing import List, Iterator, Iterable, Tuple
 
-from wgraph.parsing.types import Ref, Title, Section, Line
+from wgraph.parsing.structs import Ref, Title, Section, Line
 from wgraph.parsing.utils import iter_templates
 
 
@@ -255,6 +255,8 @@ def parse_reference(ref: str) -> Iterator[Ref]:
         parts = [p for p in ref.split("|") if "=" not in p]
         if parts:
             yield from parser(parts)
+    else:
+        print('????', kind)
 
 
 def iter_references(

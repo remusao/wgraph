@@ -16,7 +16,6 @@ from collections import defaultdict
 import itertools
 
 import docopt
-import graphviz as gv
 
 from wgraph.graph import (
     Word,
@@ -30,6 +29,7 @@ from wgraph.graph import (
 
 
 def is_invalid(string):
+    print("IS VALID?", string)
     if not string:
         return True
     if len(string) > 20:
@@ -43,17 +43,16 @@ def is_invalid(string):
     return False
 
 
-def main():
-    args = docopt.docopt(__doc__)
-    path = args["<graph>"]
-    word = Word(args["<word>"])
-    max_depth = int(args["--max-depth"])
-
-    graph = load(path)
-
+def go(graph, word, max_depth=1, max_nodes=50, group_by_origin=True):
     g = create_graph(root=word)
-    etymology = itertools.islice(dfs(graph=graph, max_depth=max_depth, word=word), 50)
-    if args["--group-by-origin"]:
+
+    # TODO first identify all source languages with this word, then create one
+    # sub-graph for each.
+
+    etymology = itertools.islice(
+        dfs(graph=graph, max_depth=max_depth, word=word), max_nodes
+    )
+    if group_by_origin:
         by_origin = defaultdict(list)
         for parent, _, ref in etymology:
             if is_invalid(ref.word) or (parent is not None and is_invalid(parent.word)):
@@ -75,10 +74,21 @@ def main():
                 and (parent is None or not is_invalid(parent.word))
             ),
         )
+    return g
 
-    # Style 2
-    # g.node("word3")
-    # g.edge("start_word", "word3", label="cognates")
+
+def main():
+    args = docopt.docopt(__doc__)
+    path = args["<graph>"]
+    word = Word(args["<word>"])
+    max_depth = int(args["--max-depth"])
+
+    g = go(
+        graph=load(path),
+        word=word,
+        max_depth=max_depth,
+        group_by_origin=args["--group-by-origin"],
+    )
 
     filename = f"wgraph_{word}"
     apply_styles(word, g).render(filename)

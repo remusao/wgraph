@@ -14,3 +14,11 @@ Some use-cases:
   editions of Wiktionary: e.g. `en` + `fr`)
 * Find the closest word in `lang1` from `w` in `lang2` (e.g.: What's the closest
   English word from German word `Buch`?)
+
+## Downloading dumps
+
+Check: https://dumps.wikimedia.org/backup-index.html
+
+Then find `enwiktionary`, `frwiktionary`, `dewiktionary`, `trwiktionary`, etc.
+
+In each of these pages, look for the 'All pages, current versions only.', the file format should be something like `enwiktionary-20220701-pages-meta-current.xml.bz2`.

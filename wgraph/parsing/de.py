@@ -5,7 +5,7 @@
 
 # from typing import Iterator, Iterable, Tuple
 #
-# from wgraph.parsing.types import Ref, Title, Section, Line
+# from wgraph.parsing.structs import Ref, Title, Section, Line
 #
 #
 # def iter_references(
