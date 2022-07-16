@@ -14,7 +14,7 @@ def parse_inherited(parts: List[str]) -> Iterator[Ref]:
     earlier stage of the same language: https://en.wiktionary.org/wiki/Template:inherited.
     """
     if len(parts) > 3:
-        yield Ref(origin=parts[2], word=parts[3], kind="inherit")
+        yield Ref(origin=parts[2], destination=parts[1], word=parts[3], kind="inherit")
 
 
 def parse_derived(parts: List[str]) -> Iterator[Ref]:
@@ -24,7 +24,7 @@ def parse_derived(parts: List[str]) -> Iterator[Ref]:
     codes twice: https://en.wiktionary.org/wiki/Template:derived/documentation.
     """
     if len(parts) > 3:
-        yield Ref(origin=parts[2], word=parts[3], kind="derived")
+        yield Ref(origin=parts[2], destination=parts[1], word=parts[3], kind="derived")
 
 
 def parse_borrowed(parts: List[str]) -> Iterator[Ref]:
@@ -32,7 +32,7 @@ def parse_borrowed(parts: List[str]) -> Iterator[Ref]:
     loanwords: https://en.wiktionary.org/wiki/Template:borrowed/documentation
     """
     if len(parts) > 3:
-        yield Ref(origin=parts[2], word=parts[3], kind="borrowed")
+        yield Ref(origin=parts[2], destination=None, word=parts[3], kind="borrowed")
 
 
 def parse_affix(parts: List[str]) -> Iterator[Ref]:
@@ -41,7 +41,9 @@ def parse_affix(parts: List[str]) -> Iterator[Ref]:
     compounds too, like {{compound}}: https://en.wiktionary.org/wiki/Template:affix/documentation
     """
     if len(parts) > 2:
-        yield Ref(origin=parts[1], word="".join(parts[2:]), kind="affix")
+        yield Ref(
+            origin=parts[1], destination=None, word="".join(parts[2:]), kind="affix"
+        )
     # else:
     #     print("AFFIX", parts)
 
@@ -49,16 +51,26 @@ def parse_affix(parts: List[str]) -> Iterator[Ref]:
 def parse_prefix(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:prefix/documentation"""
     if len(parts) == 2:
-        yield Ref(origin=None, word=f"{parts[1]}-", kind="prefix")
-        yield Ref(origin=None, word=parts[1], kind="prefix-")
+        yield Ref(origin=None, destination=None, word=f"{parts[1]}-", kind="prefix")
+        yield Ref(origin=None, destination=None, word=parts[1], kind="prefix-")
     elif len(parts) == 3:
-        yield Ref(origin=None, word=f"{parts[1]}- + {parts[2]}", kind="prefix")
-        yield Ref(origin=None, word=parts[1], kind="prefix-")
-        yield Ref(origin=None, word=parts[2], kind="-prefix")
+        yield Ref(
+            origin=None,
+            destination=None,
+            word=f"{parts[1]}- + {parts[2]}",
+            kind="prefix",
+        )
+        yield Ref(origin=None, destination=None, word=parts[1], kind="prefix-")
+        yield Ref(origin=None, destination=None, word=parts[2], kind="-prefix")
     elif len(parts) == 4:
-        yield Ref(origin=parts[1], word=f"{parts[2]}- + {parts[3]}", kind="prefix")
-        yield Ref(origin=parts[1], word=parts[2], kind="prefix-")
-        yield Ref(origin=parts[1], word=parts[3], kind="-prefix")
+        yield Ref(
+            origin=parts[1],
+            destination=None,
+            word=f"{parts[2]}- + {parts[3]}",
+            kind="prefix",
+        )
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="prefix-")
+        yield Ref(origin=parts[1], destination=None, word=parts[3], kind="-prefix")
     # else:
     #     print("PREFIX", parts)
 
@@ -66,16 +78,26 @@ def parse_prefix(parts: List[str]) -> Iterator[Ref]:
 def parse_suffix(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:suffix/documentation"""
     if len(parts) == 2:
-        yield Ref(origin=None, word=f"-{parts[1]}", kind="suffix")
-        yield Ref(origin=None, word=parts[1], kind="-suffix")
+        yield Ref(origin=None, destination=None, word=f"-{parts[1]}", kind="suffix")
+        yield Ref(origin=None, destination=None, word=parts[1], kind="-suffix")
     elif len(parts) == 3:
-        yield Ref(origin=None, word=f"{parts[1]} + -{parts[2]}", kind="suffix")
-        yield Ref(origin=None, word=parts[1], kind="suffix-")
-        yield Ref(origin=None, word=parts[2], kind="-suffix")
+        yield Ref(
+            origin=None,
+            destination=None,
+            word=f"{parts[1]} + -{parts[2]}",
+            kind="suffix",
+        )
+        yield Ref(origin=None, destination=None, word=parts[1], kind="suffix-")
+        yield Ref(origin=None, destination=None, word=parts[2], kind="-suffix")
     elif len(parts) == 4:
-        yield Ref(origin=parts[1], word=f"{parts[2]} + -{parts[3]}", kind="suffix")
-        yield Ref(origin=parts[1], word=parts[2], kind="suffix-")
-        yield Ref(origin=parts[1], word=parts[3], kind="-suffix")
+        yield Ref(
+            origin=parts[1],
+            destination=None,
+            word=f"{parts[2]} + -{parts[3]}",
+            kind="suffix",
+        )
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="suffix-")
+        yield Ref(origin=parts[1], destination=None, word=parts[3], kind="-suffix")
     # else:
     #     print("SUFFIX", parts)
     return None
@@ -84,22 +106,33 @@ def parse_suffix(parts: List[str]) -> Iterator[Ref]:
 def parse_confix(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:confix/documentation"""
     if len(parts) == 3:
-        yield Ref(origin=None, word=f"{parts[1]}- + -{parts[2]}", kind="confix")
-        yield Ref(origin=None, word=parts[1], kind="confix-")
-        yield Ref(origin=None, word=parts[2], kind="-confix")
+        yield Ref(
+            origin=None,
+            destination=None,
+            word=f"{parts[1]}- + -{parts[2]}",
+            kind="confix",
+        )
+        yield Ref(origin=None, destination=None, word=parts[1], kind="confix-")
+        yield Ref(origin=None, destination=None, word=parts[2], kind="-confix")
     elif len(parts) == 4:
-        yield Ref(origin=parts[1], word=f"{parts[2]}- + -{parts[3]}", kind="confix")
-        yield Ref(origin=parts[1], word=parts[2], kind="confix-")
-        yield Ref(origin=parts[1], word=parts[3], kind="-confix")
+        yield Ref(
+            origin=parts[1],
+            destination=None,
+            word=f"{parts[2]}- + -{parts[3]}",
+            kind="confix",
+        )
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="confix-")
+        yield Ref(origin=parts[1], destination=None, word=parts[3], kind="-confix")
     elif len(parts) == 5:
         yield Ref(
             origin=parts[1],
+            destination=None,
             word=f"{parts[2]}- + -{parts[3]}- + -{parts[4]}",
             kind="confix",
         )
-        yield Ref(origin=parts[1], word=parts[2], kind="confix-")
-        yield Ref(origin=parts[1], word=parts[3], kind="-confix-")
-        yield Ref(origin=parts[1], word=parts[4], kind="-confix")
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="confix-")
+        yield Ref(origin=parts[1], destination=None, word=parts[3], kind="-confix-")
+        yield Ref(origin=parts[1], destination=None, word=parts[4], kind="-confix")
     # else:
     #     print("CONFIX", parts)
 
@@ -107,32 +140,44 @@ def parse_confix(parts: List[str]) -> Iterator[Ref]:
 def parse_compound(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:compound/documentation"""
     if len(parts) == 3:
-        yield Ref(origin=None, word=f"{parts[1]} + {parts[2]}", kind="compound")
-        yield Ref(origin=None, word=parts[1], kind="compound-")
-        yield Ref(origin=None, word=parts[2], kind="-compound")
+        yield Ref(
+            origin=None,
+            destination=None,
+            word=f"{parts[1]} + {parts[2]}",
+            kind="compound",
+        )
+        yield Ref(origin=None, destination=None, word=parts[1], kind="compound-")
+        yield Ref(origin=None, destination=None, word=parts[2], kind="-compound")
     elif len(parts) == 4:
-        yield Ref(origin=parts[1], word=f"{parts[2]} + {parts[3]}", kind="compound")
-        yield Ref(origin=parts[1], word=parts[2], kind="compound-")
-        yield Ref(origin=parts[1], word=parts[3], kind="-compound")
+        yield Ref(
+            origin=parts[1],
+            destination=None,
+            word=f"{parts[2]} + {parts[3]}",
+            kind="compound",
+        )
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="compound-")
+        yield Ref(origin=parts[1], destination=None, word=parts[3], kind="-compound")
     elif len(parts) == 5:
         yield Ref(
             origin=parts[1],
+            destination=None,
             word=f"{parts[2]} + {parts[3]} + {parts[4]}",
             kind="compound",
         )
-        yield Ref(origin=parts[1], word=parts[2], kind="compound-")
-        yield Ref(origin=parts[1], word=parts[3], kind="-compound-")
-        yield Ref(origin=parts[1], word=parts[4], kind="-compound")
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="compound-")
+        yield Ref(origin=parts[1], destination=None, word=parts[3], kind="-compound-")
+        yield Ref(origin=parts[1], destination=None, word=parts[4], kind="-compound")
     elif len(parts) == 6:
         yield Ref(
             origin=parts[1],
+            destination=None,
             word=f"{parts[2]} + {parts[3]} + {parts[4]} + {parts[5]}",
             kind="compound",
         )
-        yield Ref(origin=parts[1], word=parts[2], kind="compound-")
-        yield Ref(origin=parts[1], word=parts[3], kind="-compound-")
-        yield Ref(origin=parts[1], word=parts[4], kind="-compound-")
-        yield Ref(origin=parts[1], word=parts[5], kind="-compound")
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="compound-")
+        yield Ref(origin=parts[1], destination=None, word=parts[3], kind="-compound-")
+        yield Ref(origin=parts[1], destination=None, word=parts[4], kind="-compound-")
+        yield Ref(origin=parts[1], destination=None, word=parts[5], kind="-compound")
     # else:
     #     print("COMPOUND", parts)
 
@@ -140,13 +185,20 @@ def parse_compound(parts: List[str]) -> Iterator[Ref]:
 def parse_blend(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:blend/documentation"""
     if len(parts) == 3:
-        yield Ref(origin=None, word=f"{parts[1]} ~ {parts[2]}", kind="blend")
-        yield Ref(origin=None, word=parts[1], kind="blend-")
-        yield Ref(origin=None, word=parts[2], kind="-blend")
+        yield Ref(
+            origin=None, destination=None, word=f"{parts[1]} ~ {parts[2]}", kind="blend"
+        )
+        yield Ref(origin=None, destination=None, word=parts[1], kind="blend-")
+        yield Ref(origin=None, destination=None, word=parts[2], kind="-blend")
     elif len(parts) == 4:
-        yield Ref(origin=parts[1], word=f"{parts[2]} ~ {parts[3]}", kind="blend")
-        yield Ref(origin=parts[1], word=parts[2], kind="blend-")
-        yield Ref(origin=parts[1], word=parts[3], kind="-blend")
+        yield Ref(
+            origin=parts[1],
+            destination=None,
+            word=f"{parts[2]} ~ {parts[3]}",
+            kind="blend",
+        )
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="blend-")
+        yield Ref(origin=parts[1], destination=None, word=parts[3], kind="-blend")
     # else:
     #     print("BLEND", parts)
 
@@ -154,9 +206,9 @@ def parse_blend(parts: List[str]) -> Iterator[Ref]:
 def parse_clipping(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:clipping/documentation"""
     if len(parts) == 2:
-        yield Ref(origin=None, word=parts[1], kind="clipping")
+        yield Ref(origin=None, destination=None, word=parts[1], kind="clipping")
     elif len(parts) == 3:
-        yield Ref(origin=parts[1], word=parts[2], kind="clipping")
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="clipping")
     # else:
     #     print("CLIPPING", parts)
 
@@ -164,7 +216,7 @@ def parse_clipping(parts: List[str]) -> Iterator[Ref]:
 def parse_short_for(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:clipping/documentation"""
     if len(parts) > 2:
-        yield Ref(origin=None, word=parts[1], kind="short-for")
+        yield Ref(origin=None, destination=None, word=parts[1], kind="short-for")
     # else:
     #     print("SHORT FOR", parts)
 
@@ -172,9 +224,11 @@ def parse_short_for(parts: List[str]) -> Iterator[Ref]:
 def parse_back_form(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:back-formation/documentation"""
     if len(parts) == 2:
-        yield Ref(origin=None, word=parts[1], kind="back-formation")
+        yield Ref(origin=None, destination=None, word=parts[1], kind="back-formation")
     elif len(parts) == 3:
-        yield Ref(origin=parts[1], word=parts[2], kind="back-formation")
+        yield Ref(
+            origin=parts[1], destination=None, word=parts[2], kind="back-formation"
+        )
     # else:
     #     print("BACK FORMATION", parts)
 
@@ -182,7 +236,7 @@ def parse_back_form(parts: List[str]) -> Iterator[Ref]:
 def parse_calque(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:calque/documentation"""
     if len(parts) > 3:
-        yield Ref(origin=parts[2], word=parts[3], kind="calque")
+        yield Ref(origin=parts[2], destination=None, word=parts[3], kind="calque")
     # else:
     #     print("CALQUE", parts)
 
@@ -190,7 +244,9 @@ def parse_calque(parts: List[str]) -> Iterator[Ref]:
 def parse_semantic_loan(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:semantic_loan/documentation"""
     if len(parts) > 3:
-        yield Ref(origin=parts[2], word=parts[3], kind="semantic-loan")
+        yield Ref(
+            origin=parts[2], destination=None, word=parts[3], kind="semantic-loan"
+        )
     # else:
     #     print("SEMANTIC LOAN", parts)
 
@@ -198,7 +254,7 @@ def parse_semantic_loan(parts: List[str]) -> Iterator[Ref]:
 def parse_mention(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:link/documentation"""
     if len(parts) > 2:
-        yield Ref(origin=parts[1], word=parts[2], kind="mention")
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="mention")
     # else:
     #     print("MENTION", parts)
 
@@ -206,7 +262,7 @@ def parse_mention(parts: List[str]) -> Iterator[Ref]:
 def parse_cognate(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:cognate/documentation"""
     if len(parts) > 2:
-        yield Ref(origin=parts[1], word=parts[2], kind="cognate")
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="cognate")
     # else:
     #     print("COGNATE", parts)
 
@@ -214,7 +270,7 @@ def parse_cognate(parts: List[str]) -> Iterator[Ref]:
 def parse_non_cognate(parts: List[str]) -> Iterator[Ref]:
     """https://en.wiktionary.org/wiki/Template:noncognate"""
     if len(parts) > 2:
-        yield Ref(origin=parts[1], word=parts[2], kind="noncog")
+        yield Ref(origin=parts[1], destination=None, word=parts[2], kind="noncog")
     # else:
     #     print("NONCOGNATE", parts)
 
@@ -255,15 +311,19 @@ def parse_reference(ref: str) -> Iterator[Ref]:
         parts = [p for p in ref.split("|") if "=" not in p]
         if parts:
             yield from parser(parts)
-    else:
-        print('????', kind)
+    # else:
+    #     print("????", kind)
 
 
 def iter_references(
     lines: Iterable[Tuple[Title, Section, Line]]
 ) -> Iterator[Tuple[Title, Ref]]:
     for title, section, line in lines:
+        # TODO - here detect language of this section (reverse mapping from
+        # iso639.languages) Then return this alongside title and ref, this will
+        # allow to have keys as (word, language) instead of just (word), which
+        # is ambiguous.
         if "etymology" in section:
-            for template in iter_templates(line):
+            for default_destination, template in iter_templates(line):
                 for reference in parse_reference(template):
                     yield title, reference
